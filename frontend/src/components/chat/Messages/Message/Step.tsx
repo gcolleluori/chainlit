@@ -28,6 +28,7 @@ export default function Step({
   const hasContent = step.input || step.output || step.steps?.length;
   const isError = step.isError;
   const stepName = step.name;
+  const logoUrl = step.metadata?.logo_url as string | undefined;
 
   // If there's no content, just render the status without accordion
   if (!hasContent) {
@@ -42,6 +43,9 @@ export default function Step({
           )}
           id={`step-${stepName}`}
         >
+          {logoUrl && (
+            <img src={logoUrl} alt="" className="w-4 h-4 inline-block mr-1" />
+          )}
           {using ? (
             <>
               <Translator path="chat.messages.status.using" /> {stepName}
@@ -74,6 +78,9 @@ export default function Step({
             )}
             id={`step-${stepName}`}
           >
+            {logoUrl && (
+              <img src={logoUrl} alt="" className="w-4 h-4 inline-block mr-1" />
+            )}
             {using ? (
               <>
                 <Translator path="chat.messages.status.using" /> {stepName}
