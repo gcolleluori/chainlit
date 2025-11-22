@@ -58,9 +58,12 @@ const Message = memo(
     const hiddenSkip = isStep && cot === 'hidden';
 
     const skip = toolCallSkip || hiddenSkip;
-    const shouldRenderChildStepsBefore =
+
+    // Check if this assistant message has tool steps that should render inline
+    const hasToolSteps =
       message.type === 'assistant_message' &&
       message.steps?.some((s) => s.type === 'tool');
+
     const renderChildSteps = () =>
       message.steps ? (
         <Messages
@@ -93,7 +96,6 @@ const Message = memo(
 
     return (
       <>
-        {shouldRenderChildStepsBefore ? renderChildSteps() : null}
         <div data-step-type={message.type} className="step py-2">
           <div
             className="flex flex-col"
@@ -175,6 +177,9 @@ const Message = memo(
                         latex={latex}
                       />
 
+                      {/* Render tool steps inline after the message content */}
+                      {hasToolSteps ? renderChildSteps() : null}
+
                       <AskFileButton messageId={message.id} onError={onError} />
                       <AskActionButtons
                         actions={actions}
@@ -207,8 +212,8 @@ const Message = memo(
             scorableRun={scorableRun}
           />
         ) : null}
-        {/* Display the child steps if the message is not a step (usually a user message). */}
-        {!isStep && !shouldRenderChildStepsBefore ? renderChildSteps() : null}
+        {/* Display the child steps if the message is not a step and doesn't have tool steps (usually a user message). */}
+        {!isStep && !hasToolSteps ? renderChildSteps() : null}
       </>
     );
   }
