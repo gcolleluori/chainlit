@@ -39,6 +39,13 @@ const Message = memo(
     isScorable,
     scorableRun
   }: Props) => {
+    // Temporary logging to understand rendering order
+    console.log('[Message render]', {
+      id: message.id,
+      type: message.type,
+      steps: message.steps?.map((s) => s.type)
+    });
+
     const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const contentRef = useRef<HTMLDivElement>(null);
@@ -52,7 +59,8 @@ const Message = memo(
 
     const skip = toolCallSkip || hiddenSkip;
     const shouldRenderChildStepsBefore =
-      !isStep && message.type === 'assistant_message';
+      message.type === 'assistant_message' &&
+      message.steps?.some((s) => s.type === 'tool');
     const renderChildSteps = () =>
       message.steps ? (
         <Messages
