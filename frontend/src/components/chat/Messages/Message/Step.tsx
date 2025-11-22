@@ -30,6 +30,13 @@ export default function Step({
   const stepName = step.name;
   const logoUrl = step.metadata?.logo_url as string | undefined;
 
+  // Debug: log step metadata
+  console.log('[Step render]', {
+    name: stepName,
+    metadata: step.metadata,
+    logoUrl
+  });
+
   // If there's no content, just render the status without accordion
   if (!hasContent) {
     return (
