@@ -178,7 +178,18 @@ const Message = memo(
                       />
 
                       {/* Render tool steps inline after the message content */}
-                      {hasToolSteps ? renderChildSteps() : null}
+                      {hasToolSteps && message.steps ? (
+                        <div className="w-full">
+                          <Messages
+                            messages={message.steps}
+                            elements={elements}
+                            actions={actions}
+                            indent={indent + 1}
+                            isRunning={isRunning}
+                            scorableRun={scorableRun}
+                          />
+                        </div>
+                      ) : null}
 
                       <AskFileButton messageId={message.id} onError={onError} />
                       <AskActionButtons
