@@ -51,6 +51,19 @@ const Message = memo(
     const hiddenSkip = isStep && cot === 'hidden';
 
     const skip = toolCallSkip || hiddenSkip;
+    const shouldRenderChildStepsBefore =
+      !isStep && message.type === 'assistant_message';
+    const renderChildSteps = () =>
+      message.steps ? (
+        <Messages
+          messages={message.steps}
+          elements={elements}
+          actions={actions}
+          indent={indent}
+          isRunning={isRunning}
+          scorableRun={scorableRun}
+        />
+      ) : null;
     const showInputSection = Boolean(message.input && message.showInput);
     const shouldRenderOutput = !showInputSection || Boolean(message.output);
 
@@ -72,6 +85,7 @@ const Message = memo(
 
     return (
       <>
+        {shouldRenderChildStepsBefore ? renderChildSteps() : null}
         <div data-step-type={message.type} className="step py-2">
           <div
             className="flex flex-col"
@@ -186,15 +200,7 @@ const Message = memo(
           />
         ) : null}
         {/* Display the child steps if the message is not a step (usually a user message). */}
-        {message.steps && !isStep ? (
-          <Messages
-            messages={message.steps}
-            elements={elements}
-            actions={actions}
-            indent={indent}
-            isRunning={isRunning}
-          />
-        ) : null}
+        {!isStep && !shouldRenderChildStepsBefore ? renderChildSteps() : null}
       </>
     );
   }
