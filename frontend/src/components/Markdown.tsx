@@ -113,10 +113,10 @@ const Markdown = ({
   const remarkPlugins = useMemo(() => {
     let remarkPlugins: PluggableList = [
       cursorPlugin,
-      remarkCustomEmoji,
       remarkGfm as any,
       remarkDirective as any,
-      MarkdownAlert
+      MarkdownAlert,
+      remarkCustomEmoji // Run last to process text after other plugins
     ];
 
     if (latex) {
@@ -278,8 +278,8 @@ const Markdown = ({
         },
         // @ts-expect-error custom plugin
         blinkingCursor: () => <BlinkingCursor whitespace />,
-        // @ts-expect-error custom plugin - must be lowercase to match HTML element
-        customemoji: ({ name }: { name: string }) => (
+        // @ts-expect-error custom plugin
+        customEmoji: ({ name }: { name: string }) => (
           <CustomEmoji name={name} />
         ),
         alert: ({

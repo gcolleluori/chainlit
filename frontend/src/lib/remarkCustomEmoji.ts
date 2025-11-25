@@ -64,11 +64,11 @@ const remarkCustomEmoji = () => {
             });
           }
 
-          // Add the custom emoji node (lowercase to match HTML element naming)
+          // Add the custom emoji node
           newNodes.push({
-            type: 'customemoji',
+            type: 'customEmoji',
             data: {
-              hName: 'customemoji',
+              hName: 'customEmoji',
               hProperties: { name: emojiName }
             }
           });
