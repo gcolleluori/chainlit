@@ -126,11 +126,12 @@ const Markdown = ({
     if (!children) return children;
 
     // Replace :emoji-name: or :emoji_name: patterns with img tags
+    // Use data-emoji attribute to identify custom emoji images for special handling
     return children.replace(/:([a-zA-Z0-9_-]+):/g, (match, name) => {
       // Normalize name (convert underscores to hyphens)
       const normalizedName = name.replace(/_/g, '-');
       if (CUSTOM_EMOJIS.has(normalizedName)) {
-        return `<img src="/public/emojis/${normalizedName}.png" alt=":${name}:" title=":${name}:" style="display:inline-block;vertical-align:middle;height:1.2em;width:auto;" />`;
+        return `<img src="/public/emojis/${normalizedName}.png" alt=":${name}:" title=":${name}:" data-emoji="true" />`;
       }
       return match; // Return original if not a known custom emoji
     });
@@ -172,6 +173,24 @@ const Markdown = ({
           }
         },
         img: (image: any) => {
+          const imgSrc = image.src?.startsWith('/public')
+            ? apiClient.buildEndpoint(image.src)
+            : image.src;
+
+          // Custom emoji images - render inline
+          if (image['data-emoji'] === 'true') {
+            return (
+              <img
+                src={imgSrc}
+                alt={image.alt}
+                title={image.title}
+                className="inline-block align-middle"
+                style={{ height: '1.2em', width: 'auto' }}
+              />
+            );
+          }
+
+          // Regular images - render with AspectRatio wrapper
           return (
             <div className="sm:max-w-sm md:max-w-md">
               <AspectRatio
@@ -179,11 +198,7 @@ const Markdown = ({
                 className="bg-muted rounded-md overflow-hidden"
               >
                 <img
-                  src={
-                    image.src.startsWith('/public')
-                      ? apiClient.buildEndpoint(image.src)
-                      : image.src
-                  }
+                  src={imgSrc}
                   alt={image.alt}
                   className="h-full w-full object-contain"
                 />
