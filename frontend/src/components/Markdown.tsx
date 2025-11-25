@@ -1,4 +1,4 @@
-import { remarkCustomEmoji } from '@/lib/remarkCustomEmoji';
+import { CUSTOM_EMOJIS } from '@/lib/remarkCustomEmoji';
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
@@ -27,7 +27,6 @@ import {
 
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
-import { CustomEmoji } from './CustomEmoji';
 import { ElementRef } from './Elements/ElementRef';
 import {
   type AlertProps,
@@ -91,7 +90,7 @@ const cursorPlugin = () => {
 };
 
 const Markdown = ({
-  allowHtml,
+  allowHtml: _allowHtml,
   latex,
   refElements,
   className,
@@ -100,23 +99,20 @@ const Markdown = ({
   const apiClient = useContext(ChainlitContext);
 
   const rehypePlugins = useMemo(() => {
-    let rehypePlugins: PluggableList = [];
-    if (allowHtml) {
-      rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
-    }
+    // Always include rehypeRaw to support custom emoji img tags
+    let rehypePlugins: PluggableList = [rehypeRaw as any];
     if (latex) {
       rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
     }
     return rehypePlugins;
-  }, [allowHtml, latex]);
+  }, [latex]);
 
   const remarkPlugins = useMemo(() => {
     let remarkPlugins: PluggableList = [
       cursorPlugin,
       remarkGfm as any,
       remarkDirective as any,
-      MarkdownAlert,
-      remarkCustomEmoji // Run last to process text after other plugins
+      MarkdownAlert
     ];
 
     if (latex) {
@@ -124,6 +120,21 @@ const Markdown = ({
     }
     return remarkPlugins;
   }, [latex]);
+
+  // Preprocess content to replace custom emoji :name: with inline img tags
+  const processedChildren = useMemo(() => {
+    if (!children) return children;
+
+    // Replace :emoji-name: or :emoji_name: patterns with img tags
+    return children.replace(/:([a-zA-Z0-9_-]+):/g, (match, name) => {
+      // Normalize name (convert underscores to hyphens)
+      const normalizedName = name.replace(/_/g, '-');
+      if (CUSTOM_EMOJIS.has(normalizedName)) {
+        return `<img src="/public/emojis/${normalizedName}.png" alt=":${name}:" title=":${name}:" style="display:inline-block;vertical-align:middle;height:1.2em;width:auto;" />`;
+      }
+      return match; // Return original if not a known custom emoji
+    });
+  }, [children]);
 
   return (
     <ReactMarkdown
@@ -278,10 +289,6 @@ const Markdown = ({
         },
         // @ts-expect-error custom plugin
         blinkingCursor: () => <BlinkingCursor whitespace />,
-        // @ts-expect-error custom plugin
-        customEmoji: ({ name }: { name: string }) => (
-          <CustomEmoji name={name} />
-        ),
         alert: ({
           type,
           children,
@@ -292,7 +299,7 @@ const Markdown = ({
         }
       }}
     >
-      {children}
+      {processedChildren}
     </ReactMarkdown>
   );
 };
