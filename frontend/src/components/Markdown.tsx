@@ -1,3 +1,4 @@
+import { remarkCustomEmoji } from '@/lib/remarkCustomEmoji';
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
@@ -26,6 +27,7 @@ import {
 
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
+import { CustomEmoji } from './CustomEmoji';
 import { ElementRef } from './Elements/ElementRef';
 import {
   type AlertProps,
@@ -111,6 +113,7 @@ const Markdown = ({
   const remarkPlugins = useMemo(() => {
     let remarkPlugins: PluggableList = [
       cursorPlugin,
+      remarkCustomEmoji,
       remarkGfm as any,
       remarkDirective as any,
       MarkdownAlert
@@ -275,6 +278,10 @@ const Markdown = ({
         },
         // @ts-expect-error custom plugin
         blinkingCursor: () => <BlinkingCursor whitespace />,
+        // @ts-expect-error custom plugin
+        customEmoji: ({ name }: { name: string }) => (
+          <CustomEmoji name={name} />
+        ),
         alert: ({
           type,
           children,
