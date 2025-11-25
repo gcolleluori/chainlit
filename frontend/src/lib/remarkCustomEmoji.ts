@@ -1,15 +1,26 @@
 import { visit } from 'unist-util-visit';
 
 /**
- * A list of known custom emoji names.
+ * A list of known custom emoji names (normalized with hyphens).
  * Only these emojis will be transformed to images.
  * Others like :emoji: will be left as-is to preserve standard Slack/Discord emoji names.
+ *
+ * Note: Both underscore and hyphen versions are supported in text.
+ * e.g., :drake_yes: and :drake-yes: both work.
  */
 const CUSTOM_EMOJIS = new Set([
   'drake-yes',
   'drake-no'
   // Add more custom emojis here as needed
 ]);
+
+/**
+ * Normalize emoji name by converting underscores to hyphens.
+ * This allows both :drake_yes: and :drake-yes: to work.
+ */
+const normalizeEmojiName = (name: string): string => {
+  return name.replace(/_/g, '-');
+};
 
 /**
  * Remark plugin to transform custom emoji syntax :emoji-name: into custom nodes.
@@ -29,9 +40,9 @@ const remarkCustomEmoji = () => {
       const emojiPattern = /:([a-zA-Z0-9_-]+):/g;
       const matches = [...(node.value?.matchAll(emojiPattern) || [])];
 
-      // Filter to only custom emojis we know about
+      // Filter to only custom emojis we know about (normalize to check)
       const validMatches = matches.filter((match) =>
-        CUSTOM_EMOJIS.has(match[1])
+        CUSTOM_EMOJIS.has(normalizeEmojiName(match[1]))
       );
 
       if (validMatches.length > 0) {
@@ -39,7 +50,9 @@ const remarkCustomEmoji = () => {
         let lastIndex = 0;
 
         validMatches.forEach((match) => {
-          const [fullMatch, emojiName] = match;
+          const [fullMatch, rawEmojiName] = match;
+          // Normalize the emoji name (convert underscores to hyphens)
+          const emojiName = normalizeEmojiName(rawEmojiName);
           const startIndex = match.index!;
           const endIndex = startIndex + fullMatch.length;
 
