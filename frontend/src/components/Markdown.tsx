@@ -1,4 +1,3 @@
-import { CUSTOM_EMOJIS } from '@/lib/remarkCustomEmoji';
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
@@ -122,18 +121,18 @@ const Markdown = ({
   }, [latex]);
 
   // Preprocess content to replace custom emoji :name: with inline img tags
+  // Any :emoji-name: pattern will attempt to load from /public/emojis/
+  // If the image doesn't exist, the img onError handler will show the original text
   const processedChildren = useMemo(() => {
     if (!children) return children;
 
     // Replace :emoji-name: or :emoji_name: patterns with img tags
-    // Use data-emoji attribute to identify custom emoji images for special handling
+    // data-emoji="true" identifies these as custom emojis
+    // data-emoji-fallback stores the original text for fallback on error
     return children.replace(/:([a-zA-Z0-9_-]+):/g, (match, name) => {
-      // Normalize name (convert underscores to hyphens)
+      // Normalize name (convert underscores to hyphens) for the filename
       const normalizedName = name.replace(/_/g, '-');
-      if (CUSTOM_EMOJIS.has(normalizedName)) {
-        return `<img src="/public/emojis/${normalizedName}.png" alt=":${name}:" title=":${name}:" data-emoji="true" />`;
-      }
-      return match; // Return original if not a known custom emoji
+      return `<img src="/public/emojis/${normalizedName}.png" alt=":${name}:" title=":${name}:" data-emoji="true" data-emoji-fallback="${match}" />`;
     });
   }, [children]);
 
@@ -177,8 +176,9 @@ const Markdown = ({
             ? apiClient.buildEndpoint(image.src)
             : image.src;
 
-          // Custom emoji images - render inline
+          // Custom emoji images - render inline with fallback on error
           if (image['data-emoji'] === 'true') {
+            const fallbackText = image['data-emoji-fallback'] || image.alt;
             return (
               <img
                 src={imgSrc}
@@ -186,6 +186,12 @@ const Markdown = ({
                 title={image.title}
                 className="inline-block align-middle"
                 style={{ height: '1.2em', width: 'auto' }}
+                onError={(e) => {
+                  // If emoji image fails to load, replace with original text
+                  const target = e.target as HTMLImageElement;
+                  const textNode = document.createTextNode(fallbackText);
+                  target.parentNode?.replaceChild(textNode, target);
+                }}
               />
             );
           }
