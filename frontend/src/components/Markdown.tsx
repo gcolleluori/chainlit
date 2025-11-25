@@ -278,8 +278,8 @@ const Markdown = ({
         },
         // @ts-expect-error custom plugin
         blinkingCursor: () => <BlinkingCursor whitespace />,
-        // @ts-expect-error custom plugin
-        customEmoji: ({ name }: { name: string }) => (
+        // @ts-expect-error custom plugin - must be lowercase to match HTML element
+        customemoji: ({ name }: { name: string }) => (
           <CustomEmoji name={name} />
         ),
         alert: ({
