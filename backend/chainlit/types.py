@@ -288,13 +288,24 @@ class Theme(str, Enum):
 
 
 @dataclass
+class StarterInput(DataClassJsonMixin):
+    """Input field for a starter form."""
+
+    id: str  # Field identifier, used in message template as {id}
+    label: str  # Display label
+    placeholder: Optional[str] = None  # Placeholder text
+    required: bool = True  # Whether field is required
+
+
+@dataclass
 class Starter(DataClassJsonMixin):
     """Specification for a starter that can be chosen by the user at the thread start."""
 
     label: str
-    message: str
+    message: str  # Can contain {input_id} placeholders
     command: Optional[str] = None
     icon: Optional[str] = None
+    inputs: Optional[List[StarterInput]] = None  # If provided, shows modal form
 
 
 @dataclass

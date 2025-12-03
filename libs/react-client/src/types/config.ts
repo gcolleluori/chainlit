@@ -1,8 +1,16 @@
+export interface IStarterInput {
+  id: string;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
 export interface IStarter {
   label: string;
   message: string;
   icon?: string;
   command?: string;
+  inputs?: IStarterInput[];
 }
 
 export interface ChatProfile {
