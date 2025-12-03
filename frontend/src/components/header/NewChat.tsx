@@ -67,6 +67,46 @@ export const NewChatDialog = ({
   );
 };
 
+type SwitchProfileDialogProps = {
+  open: boolean;
+  profileName: string;
+  handleClose: () => void;
+  handleSwitch: () => void;
+  handleNewChat: () => void;
+};
+
+export const SwitchProfileDialog = ({
+  open,
+  profileName,
+  handleClose,
+  handleSwitch,
+  handleNewChat
+}: SwitchProfileDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent id="switch-profile-dialog" className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Switch to {profileName}?</DialogTitle>
+          <DialogDescription>
+            You can switch models for this conversation, or start a new chat.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="secondary" onClick={handleSwitch}>
+            Switch Model
+          </Button>
+          <Button variant="default" onClick={handleNewChat}>
+            New Chat
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   navigate?: (to: string) => void;
   onConfirm?: () => void;

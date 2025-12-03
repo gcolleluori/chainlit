@@ -22,7 +22,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { NewChatDialog } from './NewChat';
+import { SwitchProfileDialog } from './NewChat';
 
 interface Props {
   navigate?: (to: string) => void;
@@ -67,10 +67,12 @@ export default function ChatProfiles({ navigate }: Props) {
     navigate?.('/');
   };
 
-  const handleConfirm = (profile: string) => {
+  const handleConfirm = (profile: string, clearChat: boolean = true) => {
     setChatProfile(profile);
     setNewChatProfile(null);
-    clear();
+    if (clearChat) {
+      clear();
+    }
     handleClose();
   };
 
@@ -138,10 +140,21 @@ export default function ChatProfiles({ navigate }: Props) {
           })}
         </SelectContent>
       </Select>
-      <NewChatDialog
+      <SwitchProfileDialog
         open={openDialog}
+        profileName={
+          config.chatProfiles.find((p) => p.name === newChatProfile)
+            ?.display_name ||
+          newChatProfile ||
+          ''
+        }
         handleClose={handleClose}
-        handleConfirm={() => newChatProfile && handleConfirm(newChatProfile)}
+        handleSwitch={() =>
+          newChatProfile && handleConfirm(newChatProfile, false)
+        }
+        handleNewChat={() =>
+          newChatProfile && handleConfirm(newChatProfile, true)
+        }
       />
     </div>
   );
