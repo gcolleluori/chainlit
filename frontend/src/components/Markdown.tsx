@@ -121,17 +121,32 @@ const Markdown = ({
   }, [latex]);
 
   // Preprocess content to replace custom emoji :name: with inline img tags
-  // Any :emoji-name: pattern will attempt to load from /public/emojis/
-  // If the image doesn't exist, the img onError handler will show the original text
+  // ONLY registered emojis are replaced - others are left as-is
+  // This prevents random :something: patterns from being treated as emojis
   const processedChildren = useMemo(() => {
     if (!children) return children;
 
-    // Replace :emoji-name: or :emoji_name: patterns with img tags
-    // data-emoji="true" identifies these as custom emojis
-    // data-emoji-fallback stores the original text for fallback on error
+    // Registered custom emojis (must match files in /public/emojis/)
+    const registeredEmojis = new Set([
+      'drake-yes',
+      'drake-no',
+      'drake_yes', // underscore variants
+      'drake_no'
+    ]);
+
+    // Replace only registered :emoji-name: patterns with img tags
     return children.replace(/:([a-zA-Z0-9_-]+):/g, (match, name) => {
       // Normalize name (convert underscores to hyphens) for the filename
       const normalizedName = name.replace(/_/g, '-');
+
+      // Only replace if this is a registered emoji
+      if (
+        !registeredEmojis.has(name) &&
+        !registeredEmojis.has(normalizedName)
+      ) {
+        return match; // Keep original text for unregistered patterns
+      }
+
       return `<img src="/public/emojis/${normalizedName}.png" alt=":${name}:" title=":${name}:" data-emoji="true" data-emoji-fallback="${match}" />`;
     });
   }, [children]);
