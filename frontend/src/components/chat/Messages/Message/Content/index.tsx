@@ -21,10 +21,11 @@ export interface Props {
 const MessageContent = memo(
   forwardRef<HTMLDivElement, Props>(
     ({ message, elements, allowHtml, latex, sections }, ref) => {
-      const outputContent =
-        message.streaming && message.output
-          ? message.output + CURSOR_PLACEHOLDER
-          : message.output;
+      // Show cursor placeholder when streaming, even if output is empty
+      // This provides visual feedback that the AI is thinking/processing
+      const outputContent = message.streaming
+        ? (message.output || '') + CURSOR_PLACEHOLDER
+        : message.output;
 
       const {
         preparedContent: output,
@@ -102,9 +103,15 @@ const MessageContent = memo(
         </div>
       );
 
+      // Show content if there's input, output, OR if we're streaming (to show blinking cursor)
+      const showContent =
+        displayInput ||
+        (displayOutput && output) ||
+        (displayOutput && message.streaming);
+
       return (
         <div ref={ref} className="message-content w-full flex flex-col gap-2">
-          {displayInput || (displayOutput && output) ? markdownContent : null}
+          {showContent ? markdownContent : null}
           {displayOutput ? (
             <InlinedElements elements={outputInlinedElements} />
           ) : null}
