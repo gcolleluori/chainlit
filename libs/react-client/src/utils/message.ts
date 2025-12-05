@@ -34,7 +34,17 @@ const addMessage = (messages: IStep[], message: IStep): IStep[] => {
   if (hasMessageById(messages, message.id)) {
     return updateMessageById(messages, message.id, message);
   } else if ('parentId' in message && message.parentId) {
-    return addMessageToParent(messages, message.parentId, message);
+    // Try to add to parent - if parent exists
+    if (hasMessageById(messages, message.parentId)) {
+      return addMessageToParent(messages, message.parentId, message);
+    } else {
+      // Parent doesn't exist yet - add to root level
+      // The step will display at root level until parent arrives
+      console.warn(
+        `[Chainlit] Step ${message.id} has parentId ${message.parentId} but parent not found. Adding to root.`
+      );
+      return [...messages, message];
+    }
   } else if ('indent' in message && message.indent && message.indent > 0) {
     return addIndentMessage(messages, message.indent, message);
   } else {

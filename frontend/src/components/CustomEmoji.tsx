@@ -41,4 +41,3 @@ const CustomEmoji = ({ name, alt }: CustomEmojiProps) => {
 };
 
 export { CustomEmoji };
-
